@@ -257,8 +257,8 @@ export const GameSettingsModal: React.FC<GameSettingsModalProps> = ({ isOpen, on
         onClick={handleClose}
       />
 
-      <div className="relative w-full max-w-md mx-4 bg-card border border-border rounded-2xl shadow-2xl animate-scale-in overflow-hidden">
-        <div className="p-6">
+      <div className="relative w-full max-w-md mx-4 bg-card border border-border rounded-2xl shadow-2xl animate-scale-in overflow-hidden max-h-[90vh] flex flex-col">
+        <div className="p-6 overflow-y-auto flex-1">
           <button
             onClick={handleClose}
             className="absolute top-4 right-4 p-2 rounded-full hover:bg-secondary transition-colors"
