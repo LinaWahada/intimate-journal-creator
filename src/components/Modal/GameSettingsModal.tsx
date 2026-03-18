@@ -563,6 +563,27 @@ export const GameSettingsModal: React.FC<GameSettingsModalProps> = ({ isOpen, on
                     />
                   )}
                 </div>
+              ) : selectedGameMode === 'lastManStanding' ? (
+                /* LMS: Starting Hearts */
+                <div className="space-y-2">
+                  <label className="flex items-center justify-between text-sm font-medium text-foreground">
+                    <span className="flex items-center gap-2">
+                      <span className="text-destructive">❤️</span>
+                      {t('lmsStartingHearts' as any) || 'Starting Hearts'}
+                    </span>
+                  </label>
+                  <div className="flex gap-2">
+                    {([3, 5, 10] as const).map((h) => (
+                      <button
+                        key={h}
+                        onClick={() => setStartingHearts(h)}
+                        className={`flex-1 py-3 rounded-lg font-semibold transition-all text-sm ${startingHearts === h ? 'bg-destructive text-destructive-foreground' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}
+                      >
+                        {h} ❤️
+                      </button>
+                    ))}
+                  </div>
+                </div>
               ) : (
                 /* Duration Selection - Different options based on game mode */
                 <div className="space-y-2">
