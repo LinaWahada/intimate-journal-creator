@@ -406,18 +406,23 @@ export const GameSettingsModal: React.FC<GameSettingsModalProps> = ({ isOpen, on
               {/* Selected Game Mode Badge */}
               <div className="flex justify-center">
                 <span className={`px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 ${
-                  selectedGameMode === 'speedRace'
-                    ? 'bg-[hsl(var(--success))]/20 text-[hsl(var(--success))] border border-[hsl(var(--success))]/30'
-                    : selectedGameMode === 'againstTheClock'
-                      ? 'bg-warning/20 text-warning border border-warning/30'
-                      : 'bg-primary/20 text-primary border border-primary/30'
+                  selectedGameMode === 'lastManStanding'
+                    ? 'bg-destructive/20 text-destructive border border-destructive/30'
+                    : selectedGameMode === 'speedRace'
+                      ? 'bg-[hsl(var(--success))]/20 text-[hsl(var(--success))] border border-[hsl(var(--success))]/30'
+                      : selectedGameMode === 'againstTheClock'
+                        ? 'bg-warning/20 text-warning border border-warning/30'
+                        : 'bg-primary/20 text-primary border border-primary/30'
                 }`}>
                   {selectedGameMode === 'speedRace' && <Zap className="h-4 w-4" />}
-                  {selectedGameMode === 'speedRace'
-                    ? (t('speedRaceMode' as any))
-                    : selectedGameMode === 'againstTheClock'
-                      ? t('againstTheClockMode')
-                      : t('turnBasedMode')}
+                  {selectedGameMode === 'lastManStanding' && <span>💀</span>}
+                  {selectedGameMode === 'lastManStanding'
+                    ? (t('lastManStandingMode' as any))
+                    : selectedGameMode === 'speedRace'
+                      ? (t('speedRaceMode' as any))
+                      : selectedGameMode === 'againstTheClock'
+                        ? t('againstTheClockMode')
+                        : t('turnBasedMode')}
                 </span>
               </div>
 
