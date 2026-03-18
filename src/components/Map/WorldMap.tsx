@@ -235,6 +235,13 @@ export const WorldMap: React.FC<WorldMapProps> = ({
     // Get the localized name based on current language
     const localizedName = getLocalizedCountryName(gameName, language);
 
+    // In speed race mode, never reveal country names (it would be a hint)
+    // Only show names for already-completed countries (colored green)
+    if (speedRaceMode) {
+      if (isCorrect) return `✓ ${localizedName}`;
+      return '📍 Click to select';
+    }
+
     if (isCorrect) return `✓ ${localizedName}`;
     if (isWrong) return `✗ ${localizedName}`;
     if (isCurrent) return disabled ? `🎯 ${t('mapTooltipHighlighted')}` : `🎯 ${t('mapTooltipCountryToGuess')}`;
