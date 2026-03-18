@@ -410,7 +410,7 @@ export const useFirebaseSession = () => {
           speedRaceRoundState: null,
         } : {}),
         ...(gameMode === 'lastManStanding' ? {
-          startingHearts: startingHearts || 5,
+          startingHearts: (startingHearts === 3 || startingHearts === 5 || startingHearts === 10 ? startingHearts : 5) as 3 | 5 | 10,
           currentRound: 0,
           lmsRoundState: null,
           lmsPlayerStates: {},

@@ -82,6 +82,8 @@ export const GameSettingsModal: React.FC<GameSettingsModalProps> = ({ isOpen, on
 
   if (!isOpen) return null;
 
+  // LMS starting hearts
+  const [startingHearts, setStartingHearts] = useState<3 | 5 | 10>(5);
   // Compute effective rounds / players for Speed Race
   const effectiveRounds = (() => {
     if (selectedGameMode !== 'speedRace') return rounds;
