@@ -474,6 +474,27 @@ export const WorldMap: React.FC<WorldMapProps> = ({
           </Button>
         </GameTooltip>
 
+        {/* Sound toggle in speed race mode */}
+        {speedRaceMode && (
+          <>
+            <div className="h-px bg-border my-1" />
+            <GameTooltip content={soundEnabled ? t('soundOn') : t('soundOff')} position="left">
+              <Button
+                variant="secondary"
+                size="icon"
+                onClick={toggleSound}
+                className="h-10 w-10 rounded-xl border-2 border-border hover:border-primary transition-all"
+              >
+                {soundEnabled ? (
+                  <Volume2 className="h-4 w-4 text-primary" />
+                ) : (
+                  <VolumeX className="h-4 w-4 text-muted-foreground" />
+                )}
+              </Button>
+            </GameTooltip>
+          </>
+        )}
+
         {/* Only show these extra controls when NOT in speed race mode */}
         {!speedRaceMode && (
           <>
