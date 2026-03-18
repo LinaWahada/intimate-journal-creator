@@ -492,7 +492,8 @@ const SpeedRaceGame: React.FC = () => {
 
     if (nextRound > totalRoundsRef.current) {
       const allGuessed = [...(sess.guessedCountries || []), ...(rs?.country ? [rs.country] : [])];
-      await updateGameState({ guessedCountries: allGuessed, speedRaceRoundState: null, currentRound: nextRound } as any);
+      const allCorrect = [...(sess.correctCountries || []), ...(rs?.country ? [rs.country] : [])];
+      await updateGameState({ guessedCountries: allGuessed, correctCountries: allCorrect, speedRaceRoundState: null, currentRound: nextRound } as any);
       await endGame();
       return;
     }
