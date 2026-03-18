@@ -1039,8 +1039,8 @@ const LastManStandingGame: React.FC = () => {
           {(isLocation || (inLocationPhase && isContinent)) && (
             <div className={`shrink-0 px-4 py-2.5 border-b border-border ${locationSubmitted ? 'bg-secondary/30' : 'bg-background'}`}>
               <PhaseTimer
-                startTime={isLocation ? roundState.phaseStartTime : Date.now()}
-                totalSeconds={LMS_LOCATION_PHASE_TIME}
+                startTime={roundState.phaseStartTime}
+                totalSeconds={LMS_CONTINENT_PHASE_TIME + LMS_LOCATION_PHASE_TIME}
                 onExpire={handleLocationTimerExpire}
                 label={locationSubmitted ? 'Waiting for results...' : 'Select exact location'}
               />
