@@ -774,7 +774,7 @@ const LastManStandingGame: React.FC = () => {
       selectedCountry: null,
       countryConfirmedAt: null,
       isCountryCorrect: false,
-      heartLoss: isCorrect ? 0 : 0.5, // Will be recalculated after location
+      heartLoss: isCorrect ? 0 : 0.5,
       phase: 'continent',
     };
 
@@ -783,28 +783,39 @@ const LastManStandingGame: React.FC = () => {
       [currentPlayer.id]: sub,
     };
 
-    await updateGameState({
-      lmsRoundState: { ...roundState, submissions: updatedSubs },
-    } as any);
-
-    if (isCorrect) {
+    // If wrong, immediately apply 0.5 heart loss to Firebase
+    if (!isCorrect) {
+      const currentHearts = myState?.hearts || 0;
+      const newHearts = Math.max(0, currentHearts - 0.5);
+      const newLmsStates = {
+        ...(sessionRef.current?.lmsPlayerStates || {}),
+        [currentPlayer.id]: {
+          ...(lmsStates[currentPlayer.id] || { hearts: 0, isEliminated: false }),
+          hearts: newHearts,
+          isEliminated: newHearts <= 0,
+          ...(newHearts <= 0 ? { eliminatedInRound: roundState.roundNumber } : {}),
+        },
+      };
+      await updateGameState({
+        lmsRoundState: { ...roundState, submissions: updatedSubs },
+        lmsPlayerStates: newLmsStates,
+      } as any);
+      playToastSound('error');
+      addToast('error', `❌ Wrong! It's ${roundState.correctContinent}. -0.5 ❤️`);
+    } else {
+      await updateGameState({
+        lmsRoundState: { ...roundState, submissions: updatedSubs },
+      } as any);
       playToastSound('success');
       addToast('success', '✅ Correct continent! Select the exact location now.');
-      // After brief feedback, move player to location phase locally
-      setTimeout(() => {
-        setContinentFeedback(null);
-        setInLocationPhase(true);
-      }, 1000);
-    } else {
-      playToastSound('error');
-      addToast('error', `❌ Wrong continent! It was ${roundState.correctContinent}. -0.5 ❤️`);
-      // Even with wrong continent, they can still try location when location phase starts
-      setTimeout(() => {
-        setContinentFeedback(null);
-        // Will wait for global location phase
-      }, 1500);
     }
-  }, [currentPlayer, roundState, continentSubmitted, isEliminated, updateGameState, playToastSound, addToast]);
+
+    // After brief feedback, dismiss overlay and advance to location phase
+    setTimeout(() => {
+      setContinentFeedback(null);
+      setInLocationPhase(true);
+    }, isCorrect ? 800 : 1200);
+  }, [currentPlayer, roundState, continentSubmitted, isEliminated, updateGameState, playToastSound, addToast, myState, lmsStates]);
 
   // ── Map click: select country ────────────────────────────────────────────
   const handleCountryClick = useCallback((country: string) => {
