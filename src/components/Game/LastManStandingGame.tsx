@@ -972,17 +972,7 @@ const LastManStandingGame: React.FC = () => {
             </h2>
           </div>
 
-          {/* Timer */}
-          {isContinent && !inLocationPhase && (
-            <div className="shrink-0 px-4 py-2.5 border-b border-border bg-warning/5">
-              <PhaseTimer
-                startTime={roundState.phaseStartTime}
-                totalSeconds={LMS_CONTINENT_PHASE_TIME}
-                onExpire={handleContinentTimerExpire}
-                label={continentSubmitted ? 'Waiting for location phase...' : 'Select continent'}
-              />
-            </div>
-          )}
+          {/* Timer - only show location timer here (continent timer is in the overlay) */}
           {(isLocation || (inLocationPhase && isContinent)) && (
             <div className={`shrink-0 px-4 py-2.5 border-b border-border ${locationSubmitted ? 'bg-secondary/30' : 'bg-background'}`}>
               <PhaseTimer
