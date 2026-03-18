@@ -1,7 +1,58 @@
 // Game types for multiplayer World Quiz
 
 // Game mode types
-export type GameMode = 'turnBased' | 'againstTheClock' | 'speedRace';
+export type GameMode = 'turnBased' | 'againstTheClock' | 'speedRace' | 'lastManStanding';
+
+// Last Man Standing types
+export type LMSContinent = 'Africa' | 'Asia' | 'Europe' | 'North America' | 'South America' | 'Oceania';
+
+export const LMS_CONTINENTS: LMSContinent[] = ['Africa', 'Asia', 'Europe', 'North America', 'South America', 'Oceania'];
+
+export const LMS_CONTINENT_PHASE_TIME = 5;   // seconds for continent selection
+export const LMS_LOCATION_PHASE_TIME = 15;   // seconds for exact location
+export const LMS_REVEAL_TIME = 2000;          // ms to show country name
+export const LMS_COUNTDOWN_TIME = 3000;       // ms for 3-second countdown
+export const LMS_RESULTS_TIME = 6000;         // ms to show round results
+
+export type LMSHeartOption = 3 | 5 | 10;
+
+/**
+ * Heart-loss calculation for Last Man Standing:
+ * - both correct => 0
+ * - exactly one wrong => 0.5
+ * - both wrong => 1
+ */
+export const calculateHeartLoss = (continentCorrect: boolean, countryCorrect: boolean): number => {
+  if (continentCorrect && countryCorrect) return 0;
+  if (continentCorrect || countryCorrect) return 0.5;
+  return 1;
+};
+
+export interface LMSPlayerSubmission {
+  selectedContinent: LMSContinent | null;
+  continentSubmittedAt: number | null;
+  isContinentCorrect: boolean;
+  selectedCountry: string | null;
+  countryConfirmedAt: number | null;
+  isCountryCorrect: boolean;
+  heartLoss: number;
+  phase: 'continent' | 'location' | 'done'; // What phase the player is currently in
+}
+
+export interface LMSRoundState {
+  roundNumber: number;
+  country: string;
+  correctContinent: LMSContinent;
+  phase: 'reveal' | 'countdown' | 'continent' | 'location' | 'results';
+  phaseStartTime: number;
+  submissions: { [playerId: string]: LMSPlayerSubmission };
+}
+
+export interface LMSPlayerState {
+  hearts: number;
+  isEliminated: boolean;
+  eliminatedInRound?: number;
+}
  
  // Import card types
  import type { PlayerCard, ActiveCardEffect } from './cards';
