@@ -881,6 +881,7 @@ const SpeedRaceGame: React.FC = () => {
           country={pendingCountry}
           onConfirm={handleConfirm}
           onCancel={handleCancelConfirm}
+          hideCountryName={true}
         />
       )}
 
