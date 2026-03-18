@@ -1043,6 +1043,18 @@ export const translations = {
     rankDown: '↓ {n}',
     rankSame: '—',
 
+    // Last Man Standing Mode
+    lastManStandingMode: 'Dernier Survivant',
+    lastManStandingModeDesc: 'Mode élimination ! Devinez le continent, puis le pays exact. Perdez des cœurs pour les mauvaises réponses. Le dernier joueur en vie gagne !',
+    lmsFeature1: 'Réponse en 2 étapes',
+    lmsFeature2: 'Système de cœurs/vies',
+    lmsFeature3: 'Rounds d\'élimination',
+    lmsLandingDesc: 'Tous les joueurs reçoivent le même pays à chaque round. D\'abord, devinez le continent (5s), puis trouvez l\'emplacement exact (15s). Les mauvaises réponses coûtent des cœurs. Le dernier survivant gagne !',
+    lmsMultiplayerOnly: '💀 Élimination Multijoueur',
+    lmsMultiplayerOnlyDesc: 'Un mode élimination intense pour 2-20 joueurs. Créez une session, choisissez les cœurs de départ et battez-vous pour survivre !',
+    lmsStartingHearts: 'Cœurs de départ',
+    lmsLandingFeature3: 'Le dernier survivant gagne',
+
     // Daily Roll
     dailyRollTooltip: 'Bonus Quotidien',
     dailyRollTitle: 'Bonus du Jour',
