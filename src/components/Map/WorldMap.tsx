@@ -35,6 +35,8 @@ interface WorldMapProps {
   countrySelectionMode?: boolean;
   /** Speed Race mode: all countries clickable, minimal controls (zoom + recenter only), full-height */
   speedRaceMode?: boolean;
+  /** When this key changes, the map resets to default center/zoom instantly */
+  resetKey?: number | string;
 }
 
 export const WorldMap: React.FC<WorldMapProps> = ({
@@ -47,9 +49,17 @@ export const WorldMap: React.FC<WorldMapProps> = ({
   isSoloMode = false,
   countrySelectionMode = false,
   speedRaceMode = false,
+  resetKey,
 }) => {
   const { t, language } = useLanguage();
   const [position, setPosition] = useState({ coordinates: [0, 20] as [number, number], zoom: 1 });
+
+  // Reset map to center when resetKey changes (e.g. new round in Speed Race)
+  useEffect(() => {
+    if (resetKey !== undefined) {
+      setPosition({ coordinates: [0, 20], zoom: 1 });
+    }
+  }, [resetKey]);
   const [tooltip, setTooltip] = useState<{ country: string; x: number; y: number } | null>(null);
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
