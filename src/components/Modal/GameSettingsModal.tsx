@@ -110,7 +110,6 @@ export const GameSettingsModal: React.FC<GameSettingsModalProps> = ({ isOpen, on
     }
 
     if (selectedGameMode === 'speedRace') {
-      // Validate rounds
       const r = effectiveRounds;
       if (r < 10 || r > 100) {
         addToast('error', 'Rounds must be between 10 and 100');
@@ -122,8 +121,22 @@ export const GameSettingsModal: React.FC<GameSettingsModalProps> = ({ isOpen, on
         return;
       }
       try {
-        // For speed race, we pass rounds as duration (repurposed field) and totalRounds will be set inside
         const code = await createSession(p, 30, false, selectedGameMode, false, r, isOpenRoom);
+        setGeneratedCode(code);
+        addToast('success', t('sessionCreated', { code }));
+      } catch (err) {
+        addToast('error', 'Failed to create session');
+      }
+      return;
+    }
+    if (selectedGameMode === 'lastManStanding') {
+      const p = effectivePlayers;
+      if (p < 2 || p > 20) {
+        addToast('error', 'Players must be between 2 and 20');
+        return;
+      }
+      try {
+        const code = await createSession(p, 30, false, selectedGameMode, false, undefined, isOpenRoom, startingHearts);
         setGeneratedCode(code);
         addToast('success', t('sessionCreated', { code }));
       } catch (err) {
