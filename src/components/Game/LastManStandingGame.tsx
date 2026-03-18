@@ -677,21 +677,24 @@ const LastManStandingGame: React.FC = () => {
     }
 
     if (phase === 'continent') {
-      // After continent phase time, move to location phase
+      // After continent phase time, move to location phase — keep original phaseStartTime (30s continuous timer)
       const delay = Math.max(0, (LMS_CONTINENT_PHASE_TIME * 1000 + 200) - (Date.now() - roundState.phaseStartTime));
       const tid = setTimeout(async () => {
         if (!isHostRef.current) return;
         const rs = roundStateRef.current;
         if (!rs || rs.phase !== 'continent') return;
+        // DON'T reset phaseStartTime — keep the original round start for the continuous 30s timer
         await updateGameState({
-          lmsRoundState: { ...rs, phase: 'location', phaseStartTime: Date.now() },
+          lmsRoundState: { ...rs, phase: 'location' },
         } as any);
       }, delay);
       return () => clearTimeout(tid);
     }
 
     if (phase === 'location') {
-      const delay = Math.max(0, (LMS_LOCATION_PHASE_TIME * 1000 + 200) - (Date.now() - roundState.phaseStartTime));
+      // Total round time = 30s from the original phaseStartTime (continent start)
+      const totalRoundMs = (LMS_CONTINENT_PHASE_TIME + LMS_LOCATION_PHASE_TIME) * 1000 + 200;
+      const delay = Math.max(0, totalRoundMs - (Date.now() - roundState.phaseStartTime));
       const tid = setTimeout(async () => {
         if (!isHostRef.current) return;
         const rs = roundStateRef.current;
