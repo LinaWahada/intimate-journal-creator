@@ -80,10 +80,10 @@ export const GameSettingsModal: React.FC<GameSettingsModalProps> = ({ isOpen, on
     onClose();
   };
 
+  const [startingHearts, setStartingHearts] = useState<3 | 5 | 10>(5);
+
   if (!isOpen) return null;
 
-  // LMS starting hearts
-  const [startingHearts, setStartingHearts] = useState<3 | 5 | 10>(5);
   // Compute effective rounds / players for Speed Race
   const effectiveRounds = (() => {
     if (selectedGameMode !== 'speedRace') return rounds;
@@ -93,9 +93,6 @@ export const GameSettingsModal: React.FC<GameSettingsModalProps> = ({ isOpen, on
     }
     return rounds;
   })();
-
-  // LMS starting hearts
-  const [startingHearts, setStartingHearts] = useState<3 | 5 | 10>(5);
 
   const effectivePlayers = (() => {
     if (useCustomPlayers) {
