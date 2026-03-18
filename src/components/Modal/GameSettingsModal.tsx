@@ -92,6 +92,9 @@ export const GameSettingsModal: React.FC<GameSettingsModalProps> = ({ isOpen, on
     return rounds;
   })();
 
+  // LMS starting hearts
+  const [startingHearts, setStartingHearts] = useState<3 | 5 | 10>(5);
+
   const effectivePlayers = (() => {
     if (useCustomPlayers) {
       return Math.min(20, Math.max(2, customPlayersInput));
