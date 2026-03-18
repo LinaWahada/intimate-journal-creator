@@ -8,8 +8,8 @@ export type LMSContinent = 'Africa' | 'Asia' | 'Europe' | 'North America' | 'Sou
 
 export const LMS_CONTINENTS: LMSContinent[] = ['Africa', 'Asia', 'Europe', 'North America', 'South America', 'Oceania'];
 
-export const LMS_CONTINENT_PHASE_TIME = 5;   // seconds for continent selection
-export const LMS_LOCATION_PHASE_TIME = 15;   // seconds for exact location
+export const LMS_CONTINENT_PHASE_TIME = 8;   // seconds for continent selection
+export const LMS_LOCATION_PHASE_TIME = 22;   // seconds for exact location
 export const LMS_REVEAL_TIME = 2000;          // ms to show country name
 export const LMS_COUNTDOWN_TIME = 3000;       // ms for 3-second countdown
 export const LMS_RESULTS_TIME = 6000;         // ms to show round results

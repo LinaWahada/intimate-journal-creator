@@ -146,26 +146,27 @@ const ContinentSelector: React.FC<{
   disabled: boolean;
   selected: LMSContinent | null;
   feedback: { correct: boolean; correctContinent: LMSContinent } | null;
-}> = ({ onSelect, disabled, selected, feedback }) => {
-  const continentEmojis: Record<LMSContinent, string> = {
-    'Africa': '🌍',
-    'Asia': '🌏',
-    'Europe': '🏰',
-    'North America': '🗽',
-    'South America': '🌎',
-    'Oceania': '🏝️',
+  countryName: string;
+  phaseStartTime: number;
+  onTimerExpire: () => void;
+}> = ({ onSelect, disabled, selected, feedback, countryName, phaseStartTime, onTimerExpire }) => {
+  const continentImages: Record<LMSContinent, string> = {
+    'Africa': '/continents/africa.webp',
+    'Asia': '/continents/asia.webp',
+    'Europe': '/continents/europe.webp',
+    'North America': '/continents/north-america.webp',
+    'South America': '/continents/south-america.webp',
+    'Oceania': '/continents/oceania.webp',
   };
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-background/80 backdrop-blur-md p-4">
-      <div className="w-full max-w-md bg-card border border-border rounded-2xl shadow-2xl overflow-hidden animate-scale-in">
-        <div className="px-6 pt-6 pb-4 text-center">
-          <div className="w-14 h-14 rounded-full bg-destructive/10 border border-destructive/30 flex items-center justify-center mx-auto mb-4">
-            <Shield className="h-6 w-6 text-destructive" />
-          </div>
+      <div className="w-full max-w-lg bg-card border border-border rounded-2xl shadow-2xl overflow-hidden animate-scale-in">
+        <div className="px-6 pt-5 pb-3 text-center">
           <h3 className="text-xl font-display text-foreground mb-1">
             {feedback ? (feedback.correct ? '✅ Correct!' : '❌ Wrong Continent') : 'Which Continent?'}
           </h3>
+          <p className="text-lg font-display text-primary mb-2">🎯 {countryName}</p>
           {feedback && !feedback.correct && (
             <p className="text-sm text-muted-foreground">
               The correct continent is <span className="font-bold text-foreground">{feedback.correctContinent}</span>
@@ -173,21 +174,38 @@ const ContinentSelector: React.FC<{
           )}
         </div>
 
+        {/* Countdown timer */}
         {!feedback && (
-          <div className="grid grid-cols-2 gap-3 px-6 pb-6">
+          <div className="px-6 pb-3">
+            <PhaseTimer
+              startTime={phaseStartTime}
+              totalSeconds={LMS_CONTINENT_PHASE_TIME}
+              onExpire={onTimerExpire}
+              label="Select continent"
+            />
+          </div>
+        )}
+
+        {!feedback && (
+          <div className="grid grid-cols-3 gap-3 px-6 pb-6">
             {LMS_CONTINENTS.map((continent) => (
               <button
                 key={continent}
                 onClick={() => !disabled && onSelect(continent)}
                 disabled={disabled}
-                className={`p-4 rounded-xl border-2 transition-all text-center ${
+                className={`p-3 rounded-xl border-2 transition-all text-center flex flex-col items-center gap-1.5 ${
                   selected === continent
                     ? 'border-destructive bg-destructive/20 scale-105'
                     : 'border-border bg-secondary/30 hover:border-destructive/50 hover:bg-destructive/5'
                 } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
               >
-                <span className="text-2xl mb-1 block">{continentEmojis[continent]}</span>
-                <span className="text-sm font-medium text-foreground">{continent}</span>
+                <img
+                  src={continentImages[continent]}
+                  alt={continent}
+                  className="w-16 h-16 object-contain"
+                  loading="eager"
+                />
+                <span className="text-xs font-medium text-foreground leading-tight">{continent}</span>
               </button>
             ))}
           </div>
