@@ -320,7 +320,7 @@ export const useFirebaseSession = () => {
       .finally(() => setIsLoading(false));
   }, [user?.id]);
 
-   const createSession = useCallback(async (maxPlayers: number, duration: number, isSoloMode?: boolean, gameMode?: GameMode, cardModeEnabled?: boolean, totalRounds?: number, isOpenRoom?: boolean): Promise<string> => {
+   const createSession = useCallback(async (maxPlayers: number, duration: number, isSoloMode?: boolean, gameMode?: GameMode, cardModeEnabled?: boolean, totalRounds?: number, isOpenRoom?: boolean, startingHearts?: number): Promise<string> => {
     // Get current user's auth.uid
     const uid = getCurrentUid();
     if (!uid || !user) {
