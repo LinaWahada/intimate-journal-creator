@@ -500,11 +500,13 @@ const SpeedRaceGame: React.FC = () => {
 
     const allGuessed = [...(sess.guessedCountries || []), ...(rs?.country ? [rs.country] : [])];
     const allCorrect = [...(sess.correctCountries || []), ...(rs?.country ? [rs.country] : [])];
+    const nextCountry = getRandomUnplayedCountry(allGuessed);
     if (!nextCountry) { await endGame(); return; }
 
     await updateGameState({
       currentRound: nextRound,
       guessedCountries: allGuessed,
+      correctCountries: allCorrect,
       speedRaceRoundState: {
         roundNumber: nextRound,
         country: nextCountry,
