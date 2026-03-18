@@ -510,6 +510,18 @@ export const translations = {
     rankDown: '↓ {n}',
     rankSame: '—',
 
+    // Last Man Standing Mode
+    lastManStandingMode: 'Last Man Standing',
+    lastManStandingModeDesc: 'Elimination mode! Guess the continent, then the exact country. Lose hearts for wrong answers. Last player alive wins!',
+    lmsFeature1: '2-step answer flow',
+    lmsFeature2: 'Heart/lives system',
+    lmsFeature3: 'Elimination rounds',
+    lmsLandingDesc: 'All players get the same country each round. First, guess the continent (5s), then find the exact location on the map (15s). Wrong answers cost hearts. The last player standing wins!',
+    lmsMultiplayerOnly: '💀 Multiplayer Elimination',
+    lmsMultiplayerOnlyDesc: 'An intense elimination mode for 2-20 players. Create a session, choose starting hearts, and fight to survive!',
+    lmsStartingHearts: 'Starting Hearts',
+    lmsLandingFeature3: 'Last survivor wins',
+
     // Daily Roll
     dailyRollTooltip: 'Daily Bonus Roll',
     dailyRollTitle: 'Daily Bonus',
