@@ -175,12 +175,6 @@ const RoundResultsModal: React.FC<{
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-display text-foreground">Round {roundState.roundNumber} Results</h2>
-              <p className="text-sm text-muted-foreground">
-                Correct:{' '}
-                <span className="font-bold text-foreground">
-                  {getCountryFlag(roundState.country)} {roundState.country}
-                </span>
-              </p>
             </div>
             <div className="text-right">
               <p className="text-xs text-muted-foreground">Round</p>
