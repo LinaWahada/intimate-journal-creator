@@ -1026,13 +1026,19 @@ const LastManStandingGame: React.FC = () => {
             <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-0.5 font-medium">
               {roundState.phase === 'reveal' ? 'Memorize this country...' :
                roundState.phase === 'countdown' ? 'Get ready!' :
-               isContinent ? '🌍 Select the continent first!' :
-               isLocation ? '📍 Find this country on the map' :
+               (isContinent && !inLocationPhase) ? '🌍 Select the continent first!' :
+               (isLocation || inLocationPhase) ? '📍 Find this country on the map' :
                `✅ Round ${roundState.roundNumber} complete`}
             </p>
             <h2 className="text-2xl md:text-3xl font-display text-foreground leading-tight">
               {roundState.country}
             </h2>
+            {/* Show correct continent when player has submitted and is in location phase */}
+            {(inLocationPhase || isLocation) && continentSubmitted && (
+              <p className="text-xs text-muted-foreground mt-0.5">
+                🌍 <span className="font-medium text-foreground">{roundState.correctContinent}</span>
+              </p>
+            )}
           </div>
 
           {/* Timer - only show location timer here (continent timer is in the overlay) */}
