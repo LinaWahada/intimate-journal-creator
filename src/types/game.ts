@@ -155,6 +155,10 @@ export interface GameSession {
   totalRounds?: number;         // Total rounds for SpeedRace mode
   currentRound?: number;        // Current round index (1-indexed)
   speedRaceRoundState?: SpeedRaceRoundState | null; // Live round state
+  // Last Man Standing specific fields
+  startingHearts?: LMSHeartOption;
+  lmsRoundState?: LMSRoundState | null;
+  lmsPlayerStates?: { [playerId: string]: LMSPlayerState };
 }
 
 // Helper function to convert PlayersMap to Player array
