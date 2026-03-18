@@ -258,13 +258,16 @@ export const GameSettingsModal: React.FC<GameSettingsModalProps> = ({ isOpen, on
       />
 
       <div className="relative w-full max-w-md mx-4 bg-card border border-border rounded-2xl shadow-2xl animate-scale-in overflow-hidden max-h-[90vh] flex flex-col">
-        <div className="p-6 overflow-y-auto flex-1">
+        {/* Sticky close button */}
+        <div className="sticky top-0 z-10 flex justify-end p-3 pb-0">
           <button
             onClick={handleClose}
-            className="absolute top-4 right-4 p-2 rounded-full hover:bg-secondary transition-colors"
+            className="p-2 rounded-full hover:bg-secondary transition-colors bg-card/80 backdrop-blur-sm"
           >
             <X className="h-5 w-5 text-muted-foreground" />
           </button>
+        </div>
+        <div className="px-6 pb-6 overflow-y-auto flex-1 -mt-2">
 
           {mode === 'choose' && (
             <div className="space-y-6">
