@@ -1,1 +1,0 @@
-CREATE UNIQUE INDEX IF NOT EXISTS usernames_username_unique ON public.usernames (LOWER(username));
