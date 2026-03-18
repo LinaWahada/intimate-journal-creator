@@ -816,6 +816,7 @@ const SpeedRaceGame: React.FC = () => {
               onCountryClick={isGuessing && !hasSubmitted ? handleCountryClick : () => {}}
               disabled={!isGuessing || hasSubmitted}
               speedRaceMode={true}
+              resetKey={currentRound}
             />
           </div>
         </div>
