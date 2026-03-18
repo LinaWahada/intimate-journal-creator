@@ -53,6 +53,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
   resetKey,
 }) => {
   const { t, language } = useLanguage();
+  const { soundEnabled, toggleSound } = useSound();
   const [position, setPosition] = useState({ coordinates: [0, 20] as [number, number], zoom: 1 });
 
   // Reset map to center when resetKey changes (e.g. new round in Speed Race)
