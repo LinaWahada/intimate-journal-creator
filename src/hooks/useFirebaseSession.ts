@@ -409,6 +409,12 @@ export const useFirebaseSession = () => {
           currentRound: 0,
           speedRaceRoundState: null,
         } : {}),
+        ...(gameMode === 'lastManStanding' ? {
+          startingHearts: startingHearts || 5,
+          currentRound: 0,
+          lmsRoundState: null,
+          lmsPlayerStates: {},
+        } : {}),
       };
 
       await createSessionInFirebase(newSession);
