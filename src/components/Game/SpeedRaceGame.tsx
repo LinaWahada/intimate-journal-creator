@@ -499,7 +499,7 @@ const SpeedRaceGame: React.FC = () => {
     }
 
     const allGuessed = [...(sess.guessedCountries || []), ...(rs?.country ? [rs.country] : [])];
-    const nextCountry = getRandomUnplayedCountry(allGuessed);
+    const allCorrect = [...(sess.correctCountries || []), ...(rs?.country ? [rs.country] : [])];
     if (!nextCountry) { await endGame(); return; }
 
     await updateGameState({
