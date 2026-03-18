@@ -1576,6 +1576,18 @@ export const translations = {
     rankDown: '↓ {n}',
     rankSame: '—',
 
+    // Last Man Standing Mode
+    lastManStandingMode: 'آخر رجل يصمد',
+    lastManStandingModeDesc: 'وضع الإقصاء! خمّن القارة، ثم الموقع الدقيق. اخسر قلوباً عند الإجابات الخاطئة. آخر لاعب على قيد الحياة يفوز!',
+    lmsFeature1: 'إجابة من خطوتين',
+    lmsFeature2: 'نظام القلوب/الأرواح',
+    lmsFeature3: 'جولات إقصاء',
+    lmsLandingDesc: 'يحصل جميع اللاعبين على نفس الدولة في كل جولة. أولاً خمّن القارة (5 ثوانٍ)، ثم ابحث عن الموقع الدقيق (15 ثانية). الإجابات الخاطئة تكلف قلوباً. آخر من يصمد يفوز!',
+    lmsMultiplayerOnly: '💀 إقصاء جماعي',
+    lmsMultiplayerOnlyDesc: 'وضع إقصاء مكثف لـ 2-20 لاعباً. أنشئ جلسة واختر القلوب وقاتل للبقاء!',
+    lmsStartingHearts: 'قلوب البداية',
+    lmsLandingFeature3: 'آخر ناجٍ يفوز',
+
     // Daily Roll
     dailyRollTooltip: 'مكافأة يومية',
     dailyRollTitle: 'المكافأة اليومية',
