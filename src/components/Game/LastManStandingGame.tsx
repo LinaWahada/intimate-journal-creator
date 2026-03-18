@@ -553,8 +553,9 @@ const LastManStandingGame: React.FC = () => {
     const allSubs = { ...(rs.submissions || {}) };
     playersRef.current.forEach(p => {
       const pState = currentLmsStates[p.id];
-      if (pState?.isEliminated) return; // skip eliminated
+      if (pState?.isEliminated) return;
       if (!allSubs[p.id]) {
+        // No submission at all — both wrong
         allSubs[p.id] = {
           selectedContinent: null,
           continentSubmittedAt: null,
@@ -562,19 +563,27 @@ const LastManStandingGame: React.FC = () => {
           selectedCountry: null,
           countryConfirmedAt: null,
           isCountryCorrect: false,
-          heartLoss: 1, // both wrong
+          heartLoss: 1,
           phase: 'done',
         };
+      } else if (allSubs[p.id].phase !== 'done') {
+        // Submitted continent but not location — recalculate heartLoss
+        const sub = allSubs[p.id];
+        const loss = calculateHeartLoss(sub.isContinentCorrect, false);
+        allSubs[p.id] = { ...sub, heartLoss: loss, phase: 'done' };
       }
     });
 
-    // Apply heart loss and check eliminations
+    // Apply REMAINING heart loss (continent penalty was already applied immediately)
     const newLmsStates = { ...currentLmsStates };
     const newlyEliminated: string[] = [];
 
     Object.entries(allSubs).forEach(([pid, sub]) => {
       if (!newLmsStates[pid] || newLmsStates[pid].isEliminated) return;
-      const newHearts = Math.max(0, (newLmsStates[pid].hearts || 0) - sub.heartLoss);
+      // Continent penalty (0.5) was already deducted immediately. Only deduct the remainder.
+      const continentAlreadyDeducted = sub.isContinentCorrect ? 0 : 0.5;
+      const remainingLoss = Math.max(0, sub.heartLoss - continentAlreadyDeducted);
+      const newHearts = Math.max(0, (newLmsStates[pid].hearts || 0) - remainingLoss);
       newLmsStates[pid] = {
         ...newLmsStates[pid],
         hearts: newHearts,
@@ -668,21 +677,24 @@ const LastManStandingGame: React.FC = () => {
     }
 
     if (phase === 'continent') {
-      // After continent phase time, move to location phase
+      // After continent phase time, move to location phase — keep original phaseStartTime (30s continuous timer)
       const delay = Math.max(0, (LMS_CONTINENT_PHASE_TIME * 1000 + 200) - (Date.now() - roundState.phaseStartTime));
       const tid = setTimeout(async () => {
         if (!isHostRef.current) return;
         const rs = roundStateRef.current;
         if (!rs || rs.phase !== 'continent') return;
+        // DON'T reset phaseStartTime — keep the original round start for the continuous 30s timer
         await updateGameState({
-          lmsRoundState: { ...rs, phase: 'location', phaseStartTime: Date.now() },
+          lmsRoundState: { ...rs, phase: 'location' },
         } as any);
       }, delay);
       return () => clearTimeout(tid);
     }
 
     if (phase === 'location') {
-      const delay = Math.max(0, (LMS_LOCATION_PHASE_TIME * 1000 + 200) - (Date.now() - roundState.phaseStartTime));
+      // Total round time = 30s from the original phaseStartTime (continent start)
+      const totalRoundMs = (LMS_CONTINENT_PHASE_TIME + LMS_LOCATION_PHASE_TIME) * 1000 + 200;
+      const delay = Math.max(0, totalRoundMs - (Date.now() - roundState.phaseStartTime));
       const tid = setTimeout(async () => {
         if (!isHostRef.current) return;
         const rs = roundStateRef.current;
@@ -762,7 +774,7 @@ const LastManStandingGame: React.FC = () => {
       selectedCountry: null,
       countryConfirmedAt: null,
       isCountryCorrect: false,
-      heartLoss: isCorrect ? 0 : 0.5, // Will be recalculated after location
+      heartLoss: isCorrect ? 0 : 0.5,
       phase: 'continent',
     };
 
@@ -771,28 +783,39 @@ const LastManStandingGame: React.FC = () => {
       [currentPlayer.id]: sub,
     };
 
-    await updateGameState({
-      lmsRoundState: { ...roundState, submissions: updatedSubs },
-    } as any);
-
-    if (isCorrect) {
+    // If wrong, immediately apply 0.5 heart loss to Firebase
+    if (!isCorrect) {
+      const currentHearts = myState?.hearts || 0;
+      const newHearts = Math.max(0, currentHearts - 0.5);
+      const newLmsStates = {
+        ...(sessionRef.current?.lmsPlayerStates || {}),
+        [currentPlayer.id]: {
+          ...(lmsStates[currentPlayer.id] || { hearts: 0, isEliminated: false }),
+          hearts: newHearts,
+          isEliminated: newHearts <= 0,
+          ...(newHearts <= 0 ? { eliminatedInRound: roundState.roundNumber } : {}),
+        },
+      };
+      await updateGameState({
+        lmsRoundState: { ...roundState, submissions: updatedSubs },
+        lmsPlayerStates: newLmsStates,
+      } as any);
+      playToastSound('error');
+      addToast('error', `❌ Wrong! It's ${roundState.correctContinent}. -0.5 ❤️`);
+    } else {
+      await updateGameState({
+        lmsRoundState: { ...roundState, submissions: updatedSubs },
+      } as any);
       playToastSound('success');
       addToast('success', '✅ Correct continent! Select the exact location now.');
-      // After brief feedback, move player to location phase locally
-      setTimeout(() => {
-        setContinentFeedback(null);
-        setInLocationPhase(true);
-      }, 1000);
-    } else {
-      playToastSound('error');
-      addToast('error', `❌ Wrong continent! It was ${roundState.correctContinent}. -0.5 ❤️`);
-      // Even with wrong continent, they can still try location when location phase starts
-      setTimeout(() => {
-        setContinentFeedback(null);
-        // Will wait for global location phase
-      }, 1500);
     }
-  }, [currentPlayer, roundState, continentSubmitted, isEliminated, updateGameState, playToastSound, addToast]);
+
+    // After brief feedback, dismiss overlay and advance to location phase
+    setTimeout(() => {
+      setContinentFeedback(null);
+      setInLocationPhase(true);
+    }, isCorrect ? 800 : 1200);
+  }, [currentPlayer, roundState, continentSubmitted, isEliminated, updateGameState, playToastSound, addToast, myState, lmsStates]);
 
   // ── Map click: select country ────────────────────────────────────────────
   const handleCountryClick = useCallback((country: string) => {
@@ -853,14 +876,54 @@ const LastManStandingGame: React.FC = () => {
   }, [currentPlayer, roundState, locationSubmitted, pendingCountry, isEliminated, updateGameState, playToastSound, addToast]);
 
   // ── Timer expire handlers ─────────────────────────────────────────────────
-  const handleContinentTimerExpire = useCallback(() => {
-    // Close continent selector if not submitted
-    if (!continentSubmitted) {
-      setContinentSubmitted(true);
-      setContinentFeedback({ correct: false, correctContinent: roundState?.correctContinent || 'Europe' as LMSContinent });
-      setTimeout(() => setContinentFeedback(null), 1000);
-    }
-  }, [continentSubmitted, roundState?.correctContinent]);
+  const handleContinentTimerExpire = useCallback(async () => {
+    if (continentSubmitted || isEliminated || !currentPlayer) return;
+    setContinentSubmitted(true);
+    setContinentFeedback({ correct: false, correctContinent: roundState?.correctContinent || 'Europe' as LMSContinent });
+
+    // Immediately apply 0.5 heart loss for not answering
+    const currentHearts = myState?.hearts || 0;
+    const newHearts = Math.max(0, currentHearts - 0.5);
+    const newLmsStates = {
+      ...(sessionRef.current?.lmsPlayerStates || {}),
+      [currentPlayer.id]: {
+        ...(lmsStates[currentPlayer.id] || { hearts: 0, isEliminated: false }),
+        hearts: newHearts,
+        isEliminated: newHearts <= 0,
+        ...(newHearts <= 0 ? { eliminatedInRound: roundState?.roundNumber || 0 } : {}),
+      },
+    };
+
+    // Submit empty continent to Firebase
+    const sub: LMSPlayerSubmission = {
+      selectedContinent: null,
+      continentSubmittedAt: null,
+      isContinentCorrect: false,
+      selectedCountry: null,
+      countryConfirmedAt: null,
+      isCountryCorrect: false,
+      heartLoss: 1, // will be recalculated when location is also evaluated
+      phase: 'continent',
+    };
+    const updatedSubs = {
+      ...(roundState?.submissions || {}),
+      [currentPlayer.id]: sub,
+    };
+
+    await updateGameState({
+      lmsRoundState: { ...roundState!, submissions: updatedSubs },
+      lmsPlayerStates: newLmsStates,
+    } as any);
+
+    playToastSound('error');
+    addToast('error', `⏰ Time's up! It's ${roundState?.correctContinent}. -0.5 ❤️`);
+
+    // After showing correct continent, advance to location phase
+    setTimeout(() => {
+      setContinentFeedback(null);
+      setInLocationPhase(true);
+    }, 1200);
+  }, [continentSubmitted, isEliminated, currentPlayer, roundState, myState, lmsStates, updateGameState, playToastSound, addToast]);
 
   const handleLocationTimerExpire = useCallback(() => {
     setShowConfirmModal(false);
@@ -963,21 +1026,27 @@ const LastManStandingGame: React.FC = () => {
             <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-0.5 font-medium">
               {roundState.phase === 'reveal' ? 'Memorize this country...' :
                roundState.phase === 'countdown' ? 'Get ready!' :
-               isContinent ? '🌍 Select the continent first!' :
-               isLocation ? '📍 Find this country on the map' :
+               (isContinent && !inLocationPhase) ? '🌍 Select the continent first!' :
+               (isLocation || inLocationPhase) ? '📍 Find this country on the map' :
                `✅ Round ${roundState.roundNumber} complete`}
             </p>
             <h2 className="text-2xl md:text-3xl font-display text-foreground leading-tight">
               {roundState.country}
             </h2>
+            {/* Show correct continent when player has submitted and is in location phase */}
+            {(inLocationPhase || isLocation) && continentSubmitted && (
+              <p className="text-xs text-muted-foreground mt-0.5">
+                🌍 <span className="font-medium text-foreground">{roundState.correctContinent}</span>
+              </p>
+            )}
           </div>
 
           {/* Timer - only show location timer here (continent timer is in the overlay) */}
           {(isLocation || (inLocationPhase && isContinent)) && (
             <div className={`shrink-0 px-4 py-2.5 border-b border-border ${locationSubmitted ? 'bg-secondary/30' : 'bg-background'}`}>
               <PhaseTimer
-                startTime={isLocation ? roundState.phaseStartTime : Date.now()}
-                totalSeconds={LMS_LOCATION_PHASE_TIME}
+                startTime={roundState.phaseStartTime}
+                totalSeconds={LMS_CONTINENT_PHASE_TIME + LMS_LOCATION_PHASE_TIME}
                 onExpire={handleLocationTimerExpire}
                 label={locationSubmitted ? 'Waiting for results...' : 'Select exact location'}
               />
