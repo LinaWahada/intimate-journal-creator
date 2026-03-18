@@ -1104,6 +1104,9 @@ const LastManStandingGame: React.FC = () => {
           disabled={continentSubmitted}
           selected={selectedContinent}
           feedback={null}
+          countryName={roundState.country}
+          phaseStartTime={roundState.phaseStartTime}
+          onTimerExpire={handleContinentTimerExpire}
         />
       )}
 
@@ -1114,6 +1117,9 @@ const LastManStandingGame: React.FC = () => {
           disabled={true}
           selected={selectedContinent}
           feedback={continentFeedback}
+          countryName={roundState.country}
+          phaseStartTime={roundState.phaseStartTime}
+          onTimerExpire={() => {}}
         />
       )}
 
