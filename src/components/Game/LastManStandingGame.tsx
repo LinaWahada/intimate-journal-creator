@@ -876,14 +876,54 @@ const LastManStandingGame: React.FC = () => {
   }, [currentPlayer, roundState, locationSubmitted, pendingCountry, isEliminated, updateGameState, playToastSound, addToast]);
 
   // ── Timer expire handlers ─────────────────────────────────────────────────
-  const handleContinentTimerExpire = useCallback(() => {
-    // Close continent selector if not submitted
-    if (!continentSubmitted) {
-      setContinentSubmitted(true);
-      setContinentFeedback({ correct: false, correctContinent: roundState?.correctContinent || 'Europe' as LMSContinent });
-      setTimeout(() => setContinentFeedback(null), 1000);
-    }
-  }, [continentSubmitted, roundState?.correctContinent]);
+  const handleContinentTimerExpire = useCallback(async () => {
+    if (continentSubmitted || isEliminated || !currentPlayer) return;
+    setContinentSubmitted(true);
+    setContinentFeedback({ correct: false, correctContinent: roundState?.correctContinent || 'Europe' as LMSContinent });
+
+    // Immediately apply 0.5 heart loss for not answering
+    const currentHearts = myState?.hearts || 0;
+    const newHearts = Math.max(0, currentHearts - 0.5);
+    const newLmsStates = {
+      ...(sessionRef.current?.lmsPlayerStates || {}),
+      [currentPlayer.id]: {
+        ...(lmsStates[currentPlayer.id] || { hearts: 0, isEliminated: false }),
+        hearts: newHearts,
+        isEliminated: newHearts <= 0,
+        ...(newHearts <= 0 ? { eliminatedInRound: roundState?.roundNumber || 0 } : {}),
+      },
+    };
+
+    // Submit empty continent to Firebase
+    const sub: LMSPlayerSubmission = {
+      selectedContinent: null,
+      continentSubmittedAt: null,
+      isContinentCorrect: false,
+      selectedCountry: null,
+      countryConfirmedAt: null,
+      isCountryCorrect: false,
+      heartLoss: 1, // will be recalculated when location is also evaluated
+      phase: 'continent',
+    };
+    const updatedSubs = {
+      ...(roundState?.submissions || {}),
+      [currentPlayer.id]: sub,
+    };
+
+    await updateGameState({
+      lmsRoundState: { ...roundState!, submissions: updatedSubs },
+      lmsPlayerStates: newLmsStates,
+    } as any);
+
+    playToastSound('error');
+    addToast('error', `⏰ Time's up! It's ${roundState?.correctContinent}. -0.5 ❤️`);
+
+    // After showing correct continent, advance to location phase
+    setTimeout(() => {
+      setContinentFeedback(null);
+      setInLocationPhase(true);
+    }, 1200);
+  }, [continentSubmitted, isEliminated, currentPlayer, roundState, myState, lmsStates, updateGameState, playToastSound, addToast]);
 
   const handleLocationTimerExpire = useCallback(() => {
     setShowConfirmModal(false);
