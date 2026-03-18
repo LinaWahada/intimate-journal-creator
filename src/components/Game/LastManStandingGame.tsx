@@ -553,8 +553,9 @@ const LastManStandingGame: React.FC = () => {
     const allSubs = { ...(rs.submissions || {}) };
     playersRef.current.forEach(p => {
       const pState = currentLmsStates[p.id];
-      if (pState?.isEliminated) return; // skip eliminated
+      if (pState?.isEliminated) return;
       if (!allSubs[p.id]) {
+        // No submission at all — both wrong
         allSubs[p.id] = {
           selectedContinent: null,
           continentSubmittedAt: null,
@@ -562,19 +563,27 @@ const LastManStandingGame: React.FC = () => {
           selectedCountry: null,
           countryConfirmedAt: null,
           isCountryCorrect: false,
-          heartLoss: 1, // both wrong
+          heartLoss: 1,
           phase: 'done',
         };
+      } else if (allSubs[p.id].phase !== 'done') {
+        // Submitted continent but not location — recalculate heartLoss
+        const sub = allSubs[p.id];
+        const loss = calculateHeartLoss(sub.isContinentCorrect, false);
+        allSubs[p.id] = { ...sub, heartLoss: loss, phase: 'done' };
       }
     });
 
-    // Apply heart loss and check eliminations
+    // Apply REMAINING heart loss (continent penalty was already applied immediately)
     const newLmsStates = { ...currentLmsStates };
     const newlyEliminated: string[] = [];
 
     Object.entries(allSubs).forEach(([pid, sub]) => {
       if (!newLmsStates[pid] || newLmsStates[pid].isEliminated) return;
-      const newHearts = Math.max(0, (newLmsStates[pid].hearts || 0) - sub.heartLoss);
+      // Continent penalty (0.5) was already deducted immediately. Only deduct the remainder.
+      const continentAlreadyDeducted = sub.isContinentCorrect ? 0 : 0.5;
+      const remainingLoss = Math.max(0, sub.heartLoss - continentAlreadyDeducted);
+      const newHearts = Math.max(0, (newLmsStates[pid].hearts || 0) - remainingLoss);
       newLmsStates[pid] = {
         ...newLmsStates[pid],
         hearts: newHearts,
