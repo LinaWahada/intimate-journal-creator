@@ -7,7 +7,8 @@ import {
 } from 'react-simple-maps';
 import { GameTooltip } from '@/components/Tooltip/GameTooltip';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { ZoomIn, ZoomOut, Maximize, Globe, MapPin } from 'lucide-react';
+import { useSound } from '@/contexts/SoundContext';
+import { ZoomIn, ZoomOut, Maximize, Globe, MapPin, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getContinent, getMapCountryName, getGameCountryName, getCountryCoordinates } from '@/utils/countryData';
 import { getLocalizedCountryName } from '@/i18n/countryNames';
