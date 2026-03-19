@@ -5,6 +5,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   firebaseSignOut,
+  signInAnonymously,
   onAuthStateChanged,
   updateProfile as firebaseUpdateProfile,
   FirebaseUser
@@ -117,6 +118,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setGuestTimeRemaining(0);
         setUser(null);
         localStorage.removeItem(GUEST_SESSION_KEY);
+        if (auth) firebaseSignOut(auth).catch(() => {});
         addToast('info', 'Your guest session has expired. Create an account to keep playing!', 10000);
       } else {
         setGuestTimeRemaining(remaining);
@@ -137,6 +139,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
+        // Check if this is a guest (anonymous) user with an active guest session
+        const storedGuest = localStorage.getItem(GUEST_SESSION_KEY);
+        if (firebaseUser.isAnonymous && storedGuest) {
+          try {
+            const guest = JSON.parse(storedGuest) as User;
+            if (guest.guestExpiresAt && guest.guestExpiresAt > Date.now()) {
+              // Keep the guest user — don't override with mapFirebaseUser
+              setUser(guest);
+              setIsLoading(false);
+              return;
+            }
+          } catch { /* invalid stored guest, continue normally */ }
+        }
+
+        // Not a guest — clear any stale guest session
         localStorage.removeItem(GUEST_SESSION_KEY);
 
         const lastActivity = localStorage.getItem(ACTIVITY_STORAGE_KEY);
@@ -239,6 +256,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const signInAsGuest = useCallback(async (username: string) => {
+    if (!auth) throw new Error('Firebase not initialized');
     const trimmed = username.trim();
 
     // Check uniqueness against registered usernames
@@ -252,8 +270,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       throw new Error('This username is already taken by a registered player. Please choose another.');
     }
 
+    // Sign in anonymously to get a real Firebase auth uid
+    const credential = await signInAnonymously(auth);
+    const firebaseUid = credential.user.uid;
+
     const guestUser: User = {
-      id: `guest_${Math.random().toString(36).substring(2, 10)}_${Date.now()}`,
+      id: firebaseUid,
       email: '',
       username: trimmed,
       avatar: avatars[Math.floor(Math.random() * avatars.length)],
@@ -264,6 +286,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     localStorage.setItem(GUEST_SESSION_KEY, JSON.stringify(guestUser));
+    localStorage.setItem(`user_${firebaseUid}`, JSON.stringify({
+      username: trimmed,
+      avatar: guestUser.avatar,
+      color: guestUser.color,
+      stats: guestUser.stats,
+    }));
     setUser(guestUser);
     addToast('info', `Welcome ${trimmed}! You have 4 hours to play as a guest. Create an account to save your progress.`, 8000);
   }, [addToast]);
@@ -272,6 +300,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (user?.isGuest) {
       localStorage.removeItem(GUEST_SESSION_KEY);
       setUser(null);
+      // Also sign out of Firebase anonymous auth
+      if (auth) await firebaseSignOut(auth).catch(() => {});
       return;
     }
     if (!auth) return;
