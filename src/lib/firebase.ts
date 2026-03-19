@@ -5,6 +5,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
+  signInAnonymously,
   onAuthStateChanged,
   updateProfile,
   signInWithPopup,
