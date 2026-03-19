@@ -138,6 +138,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
+        // Check if this is a guest (anonymous) user with an active guest session
+        const storedGuest = localStorage.getItem(GUEST_SESSION_KEY);
+        if (firebaseUser.isAnonymous && storedGuest) {
+          try {
+            const guest = JSON.parse(storedGuest) as User;
+            if (guest.guestExpiresAt && guest.guestExpiresAt > Date.now()) {
+              // Keep the guest user — don't override with mapFirebaseUser
+              setUser(guest);
+              setIsLoading(false);
+              return;
+            }
+          } catch { /* invalid stored guest, continue normally */ }
+        }
+
+        // Not a guest — clear any stale guest session
         localStorage.removeItem(GUEST_SESSION_KEY);
 
         const lastActivity = localStorage.getItem(ACTIVITY_STORAGE_KEY);
