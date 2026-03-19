@@ -299,6 +299,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (user?.isGuest) {
       localStorage.removeItem(GUEST_SESSION_KEY);
       setUser(null);
+      // Also sign out of Firebase anonymous auth
+      if (auth) await firebaseSignOut(auth).catch(() => {});
       return;
     }
     if (!auth) return;
