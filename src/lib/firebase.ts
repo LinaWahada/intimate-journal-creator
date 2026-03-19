@@ -69,6 +69,7 @@ export {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   firebaseSignOut,
+  signInAnonymously,
   onAuthStateChanged,
   updateProfile,
   signInWithPopup,
