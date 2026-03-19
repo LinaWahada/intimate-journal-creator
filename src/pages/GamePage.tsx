@@ -1450,7 +1450,7 @@ const GamePageInner = () => {
       </nav>
 
       {/* Spacer for fixed navbar */}
-      <div className="h-20 md:h-24" />
+      <div className="h-24 md:h-28" />
 
       {/* Mobile Timer or Extra Time Message */}
       <div className="md:hidden p-3 border-b border-border">
