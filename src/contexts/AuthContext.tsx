@@ -118,6 +118,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setGuestTimeRemaining(0);
         setUser(null);
         localStorage.removeItem(GUEST_SESSION_KEY);
+        if (auth) firebaseSignOut(auth).catch(() => {});
         addToast('info', 'Your guest session has expired. Create an account to keep playing!', 10000);
       } else {
         setGuestTimeRemaining(remaining);
