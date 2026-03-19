@@ -89,14 +89,35 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const presenceUnsubscribeRef = useRef<(() => void) | null>(null);
   const presenceRegisteredRef = useRef<boolean>(false);
 
-  // Restore guest session on mount
+  // Restore guest session on mount — ensure Firebase anonymous auth is active
   useEffect(() => {
     const storedGuest = localStorage.getItem(GUEST_SESSION_KEY);
-    if (storedGuest) {
+    if (storedGuest && auth) {
       try {
         const guest = JSON.parse(storedGuest) as User;
         if (guest.guestExpiresAt && guest.guestExpiresAt > Date.now()) {
           setUser(guest);
+          // Ensure Firebase anonymous auth is active for this guest
+          if (!auth.currentUser) {
+            signInAnonymously(auth).then((cred) => {
+              // Update guest ID to match Firebase uid if it was a legacy random ID
+              if (guest.id !== cred.user.uid) {
+                const updatedGuest = { ...guest, id: cred.user.uid };
+                setUser(updatedGuest);
+                localStorage.setItem(GUEST_SESSION_KEY, JSON.stringify(updatedGuest));
+                localStorage.setItem(`user_${cred.user.uid}`, JSON.stringify({
+                  username: guest.username,
+                  avatar: guest.avatar,
+                  color: guest.color,
+                  stats: guest.stats,
+                }));
+              }
+            }).catch(() => {
+              // Anonymous auth failed — clear guest session
+              localStorage.removeItem(GUEST_SESSION_KEY);
+              setUser(null);
+            });
+          }
         } else {
           localStorage.removeItem(GUEST_SESSION_KEY);
         }
