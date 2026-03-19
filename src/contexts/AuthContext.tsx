@@ -240,6 +240,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const signInAsGuest = useCallback(async (username: string) => {
+    if (!auth) throw new Error('Firebase not initialized');
     const trimmed = username.trim();
 
     // Check uniqueness against registered usernames
@@ -253,8 +254,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       throw new Error('This username is already taken by a registered player. Please choose another.');
     }
 
+    // Sign in anonymously to get a real Firebase auth uid
+    const credential = await signInAnonymously(auth);
+    const firebaseUid = credential.user.uid;
+
     const guestUser: User = {
-      id: `guest_${Math.random().toString(36).substring(2, 10)}_${Date.now()}`,
+      id: firebaseUid,
       email: '',
       username: trimmed,
       avatar: avatars[Math.floor(Math.random() * avatars.length)],
@@ -265,6 +270,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     localStorage.setItem(GUEST_SESSION_KEY, JSON.stringify(guestUser));
+    localStorage.setItem(`user_${firebaseUid}`, JSON.stringify({
+      username: trimmed,
+      avatar: guestUser.avatar,
+      color: guestUser.color,
+      stats: guestUser.stats,
+    }));
     setUser(guestUser);
     addToast('info', `Welcome ${trimmed}! You have 4 hours to play as a guest. Create an account to save your progress.`, 8000);
   }, [addToast]);
